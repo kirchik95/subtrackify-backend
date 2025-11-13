@@ -16,14 +16,17 @@ Backend API for Subtrackify - subscription tracking application built with Fasti
 - ✅ CRUD operations for subscriptions
 - ✅ ESLint & Prettier configured
 - ✅ Git hooks with Husky
+- ✅ Import path aliases configured (@db, @modules, etc.)
 
 ## 📖 Documentation
 
+- [Architecture](docs/ARCHITECTURE.md) - Project structure and modular architecture
 - [API Documentation](docs/API.md) - Complete API reference with examples
 - [Prisma Guide](docs/PRISMA.md) - Database schema and Prisma usage
 - [Quick Start](docs/QUICKSTART.md) - Step-by-step getting started guide
 - [Linting & Formatting](docs/LINTING.md) - ESLint and Prettier configuration
 - [Libraries & Utilities](docs/LIBRARIES.md) - Guide to installed libraries and usage examples
+- [Import Aliases](docs/ALIASES.md) - Guide to using import path aliases
 
 ## 📋 Prerequisites
 

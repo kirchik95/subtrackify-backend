@@ -1,0 +1,26 @@
+feat: add import path aliases and restructure project
+
+Add TypeScript path aliases to simplify imports and improve code maintainability:
+- Configure @db, @modules, @plugins, @types aliases in tsconfig.json
+- Install tsconfig-paths for runtime support
+- Update all imports across the project to use new aliases
+- Replace relative paths (../../) with clean alias-based imports
+
+Project restructuring:
+- Move prisma client to src/db/ directory
+- Organize code into modular structure (auth, categories, profile, subscriptions)
+- Add auth plugin for Fastify authentication
+- Create shared types in src/types/
+
+Documentation:
+- Add comprehensive ALIASES.md guide with examples
+- Update README.md with alias feature and documentation link
+- Document all available aliases and usage patterns
+
+Technical changes:
+- Update npm scripts for dev and start with proper alias support
+- Configure tsx and node to resolve path aliases correctly
+- Maintain ES module compatibility with .js extensions
+
+Breaking changes: None (internal refactoring only)
+

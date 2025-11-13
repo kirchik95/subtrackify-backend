@@ -12,7 +12,15 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@db/*": ["./db/*"],
+      "@modules/*": ["./modules/*"],
+      "@plugins/*": ["./plugins/*"],
+      "@types": ["./types/index.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
