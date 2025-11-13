@@ -20,45 +20,32 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-// JSON Schema for Fastify validation
-export const registerJsonSchema = {
-  type: 'object',
-  required: ['email', 'password', 'name'],
-  properties: {
-    email: {
-      type: 'string',
-      format: 'email',
-      maxLength: 255,
-    },
-    password: {
-      type: 'string',
-      minLength: 8,
-      maxLength: 100,
-      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)',
-    },
-    name: {
-      type: 'string',
-      minLength: 2,
-      maxLength: 255,
-    },
-  },
-};
+// Response schemas (Zod)
+export const userSchema = z.object({
+  id: z.number(),
+  email: z.string(),
+  name: z.string(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
 
-export const loginJsonSchema = {
-  type: 'object',
-  required: ['email', 'password'],
-  properties: {
-    email: {
-      type: 'string',
-      format: 'email',
-    },
-    password: {
-      type: 'string',
-      minLength: 1,
-    },
-  },
-};
+export const authResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    user: userSchema,
+    token: z.string(),
+  }),
+  message: z.string(),
+});
+
+export const meResponseSchema = z.object({
+  success: z.boolean(),
+  data: userSchema,
+});
 
 // Type inference
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type User = z.infer<typeof userSchema>;
+export type AuthResponse = z.infer<typeof authResponseSchema>;
+export type MeResponse = z.infer<typeof meResponseSchema>;

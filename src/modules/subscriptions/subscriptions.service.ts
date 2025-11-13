@@ -11,7 +11,15 @@ export class SubscriptionsService {
    * Get all subscriptions for a user
    */
   async getAll(userId: number, filters?: FilterSubscriptionsQuery) {
-    const where: Record<string, unknown> = { userId };
+    const where: {
+      userId: number;
+      category?: string;
+      status?: string;
+      price?: {
+        gte?: number;
+        lte?: number;
+      };
+    } = { userId };
 
     if (filters?.category) {
       where.category = filters.category;

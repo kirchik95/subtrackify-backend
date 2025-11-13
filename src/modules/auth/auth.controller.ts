@@ -51,17 +51,22 @@ export class AuthController {
    */
   async me(request: FastifyRequest, reply: FastifyReply) {
     try {
-      // User is set by auth plugin
-      const user = request.user;
+      // Get user ID from auth plugin
+      const userId = request.user!.userId;
+
+      // Fetch full user data from database
+      const user = await authService.getUserById(userId);
+
       return reply.status(200).send({
         success: true,
         data: user,
       });
     } catch (error) {
       request.log.error(error);
+      const message = error instanceof Error ? error.message : 'Failed to fetch user';
       return reply.status(401).send({
         success: false,
-        error: 'Unauthorized',
+        error: message,
       });
     }
   }

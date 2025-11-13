@@ -83,6 +83,28 @@ export class AuthService {
   }
 
   /**
+   * Get user by ID
+   */
+  async getUserById(userId: number) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  }
+
+  /**
    * Verify JWT token
    */
   verifyToken(token: string): AuthTokenPayload {

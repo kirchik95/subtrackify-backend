@@ -7,7 +7,7 @@ export const createSubscriptionSchema = z.object({
   price: z.number().positive('Price must be positive'),
   currency: z.string().length(3, 'Currency must be 3 characters').default('USD'),
   billingCycle: z.enum(['daily', 'weekly', 'monthly', 'yearly'], {
-    errorMap: () => ({ message: 'Invalid billing cycle' }),
+    message: 'Invalid billing cycle',
   }),
   nextBillingDate: z.string().datetime('Invalid date format'),
   category: z.string().max(100).optional(),

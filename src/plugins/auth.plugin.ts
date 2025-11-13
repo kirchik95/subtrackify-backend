@@ -10,6 +10,10 @@ declare module 'fastify' {
       email: string;
     };
   }
+
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  }
 }
 
 async function authPlugin(fastify: FastifyInstance) {

@@ -1,24 +1,32 @@
 import type { FastifyInstance } from 'fastify';
 
+import {
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod';
+
 import { authController } from './auth.controller.js';
-import { loginJsonSchema, registerJsonSchema } from './auth.schema.js';
+import {
+  authResponseSchema,
+  loginSchema,
+  meResponseSchema,
+  registerSchema,
+} from './auth.schema.js';
 
 export async function authRoutes(fastify: FastifyInstance) {
+  // Set up Zod validation and serialization
+  fastify.setValidatorCompiler(validatorCompiler);
+  fastify.setSerializerCompiler(serializerCompiler);
+
   // Register
-  fastify.post(
+  fastify.withTypeProvider<ZodTypeProvider>().post(
     '/register',
     {
       schema: {
-        body: registerJsonSchema,
+        body: registerSchema,
         response: {
-          201: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              data: { type: 'object' },
-              message: { type: 'string' },
-            },
-          },
+          201: authResponseSchema,
         },
       },
     },
@@ -26,20 +34,13 @@ export async function authRoutes(fastify: FastifyInstance) {
   );
 
   // Login
-  fastify.post(
+  fastify.withTypeProvider<ZodTypeProvider>().post(
     '/login',
     {
       schema: {
-        body: loginJsonSchema,
+        body: loginSchema,
         response: {
-          200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              data: { type: 'object' },
-              message: { type: 'string' },
-            },
-          },
+          200: authResponseSchema,
         },
       },
     },
@@ -47,5 +48,15 @@ export async function authRoutes(fastify: FastifyInstance) {
   );
 
   // Get current user (protected)
-  fastify.get('/me', authController.me.bind(authController));
+  fastify.withTypeProvider<ZodTypeProvider>().get(
+    '/me',
+    {
+      schema: {
+        response: {
+          200: meResponseSchema,
+        },
+      },
+    },
+    authController.me.bind(authController)
+  );
 }
