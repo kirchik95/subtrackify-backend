@@ -54,7 +54,7 @@ curl http://localhost:3000/health
 
 - **API**: http://localhost:3000
 - **PostgreSQL**: localhost:5432
-- **pgAdmin**: http://localhost:5050 (email: `admin@subtrackify.local`, пароль: `admin`)
+- **pgAdmin**: http://localhost:5050 (email: `admin@example.com`, пароль: `admin`)
 
 ## 🧪 Тестовые запросы
 

@@ -37,6 +37,113 @@ export const filterSubscriptionsSchema = z.object({
     .optional(),
 });
 
+// JSON Schema for Fastify validation
+export const createSubscriptionJsonSchema = {
+  type: 'object',
+  required: ['name', 'price', 'currency', 'billingCycle', 'nextBillingDate'],
+  properties: {
+    name: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 255,
+    },
+    description: {
+      type: 'string',
+      maxLength: 1000,
+    },
+    price: {
+      type: 'number',
+      exclusiveMinimum: 0,
+    },
+    currency: {
+      type: 'string',
+      minLength: 3,
+      maxLength: 3,
+      default: 'USD',
+    },
+    billingCycle: {
+      type: 'string',
+      enum: ['daily', 'weekly', 'monthly', 'yearly'],
+    },
+    nextBillingDate: {
+      type: 'string',
+      format: 'date-time',
+    },
+    category: {
+      type: 'string',
+      maxLength: 100,
+    },
+  },
+};
+
+export const updateSubscriptionJsonSchema = {
+  type: 'object',
+  properties: {
+    name: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 255,
+    },
+    description: {
+      type: 'string',
+      maxLength: 1000,
+    },
+    price: {
+      type: 'number',
+      exclusiveMinimum: 0,
+    },
+    currency: {
+      type: 'string',
+      minLength: 3,
+      maxLength: 3,
+    },
+    billingCycle: {
+      type: 'string',
+      enum: ['daily', 'weekly', 'monthly', 'yearly'],
+    },
+    nextBillingDate: {
+      type: 'string',
+      format: 'date-time',
+    },
+    category: {
+      type: 'string',
+      maxLength: 100,
+    },
+  },
+};
+
+export const subscriptionIdJsonSchema = {
+  type: 'object',
+  required: ['id'],
+  properties: {
+    id: {
+      type: 'string',
+      pattern: '^\\d+$',
+    },
+  },
+};
+
+export const filterSubscriptionsJsonSchema = {
+  type: 'object',
+  properties: {
+    category: {
+      type: 'string',
+    },
+    status: {
+      type: 'string',
+      enum: ['active', 'cancelled', 'paused'],
+    },
+    minPrice: {
+      type: 'string',
+      pattern: '^\\d+(\\.\\d+)?$',
+    },
+    maxPrice: {
+      type: 'string',
+      pattern: '^\\d+(\\.\\d+)?$',
+    },
+  },
+};
+
 // Type inference
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>;

@@ -24,6 +24,7 @@ Backend API for Subtrackify - subscription tracking application built with Fasti
 - [API Documentation](docs/API.md) - Complete API reference with examples
 - [Prisma Guide](docs/PRISMA.md) - Database schema and Prisma usage
 - [Quick Start](docs/QUICKSTART.md) - Step-by-step getting started guide
+- [Security Best Practices](docs/SECURITY.md) - 🔐 Production security guidelines (READ BEFORE DEPLOY!)
 - [Linting & Formatting](docs/LINTING.md) - ESLint and Prettier configuration
 - [Libraries & Utilities](docs/LIBRARIES.md) - Guide to installed libraries and usage examples
 - [Import Aliases](docs/ALIASES.md) - Guide to using import path aliases
@@ -197,6 +198,28 @@ See `env.example` for all available environment variables:
 - `DB_NAME` - Database name
 - `DB_HOST` - Database host
 - `DB_PORT` - Database port
+- `JWT_SECRET` - JWT secret key for token signing
+
+### ⚠️ Security Warning
+
+**IMPORTANT:** The default values in `env.example` are for development only!
+
+For production deployment, you **MUST** change:
+
+1. **`DB_PASSWORD`** - Use a strong, randomly generated password
+2. **`JWT_SECRET`** - Use a long, cryptographically secure random string (at least 32 characters)
+3. **`PGADMIN_PASSWORD`** - Use a strong password
+4. **`PGADMIN_EMAIL`** - Use a real email address
+
+Generate secure secrets with:
+
+```bash
+# Generate a secure JWT secret
+openssl rand -base64 32
+
+# Generate a secure password
+openssl rand -base64 24
+```
 
 ## 🔍 pgAdmin Access
 
@@ -204,7 +227,7 @@ When running with Docker, pgAdmin is available at `http://localhost:5050`
 
 Default credentials:
 
-- Email: `admin@subtrackify.local`
+- Email: `admin@example.com`
 - Password: `admin`
 
 To connect to the database:

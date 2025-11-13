@@ -8,4 +8,14 @@ export const categoriesQuerySchema = z.object({
     .optional(),
 });
 
+// JSON Schema for Fastify validation
+export const categoriesQueryJsonSchema = {
+  type: 'object',
+  properties: {
+    includeCount: {
+      type: 'string',
+    },
+  },
+};
+
 export type CategoriesQuery = z.infer<typeof categoriesQuerySchema>;

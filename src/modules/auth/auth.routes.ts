@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
 import { authController } from './auth.controller.js';
-import { loginSchema, registerSchema } from './auth.schema.js';
+import { loginJsonSchema, registerJsonSchema } from './auth.schema.js';
 
 export async function authRoutes(fastify: FastifyInstance) {
   // Register
@@ -9,7 +9,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     '/register',
     {
       schema: {
-        body: registerSchema,
+        body: registerJsonSchema,
         response: {
           201: {
             type: 'object',
@@ -30,7 +30,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     '/login',
     {
       schema: {
-        body: loginSchema,
+        body: loginJsonSchema,
         response: {
           200: {
             type: 'object',

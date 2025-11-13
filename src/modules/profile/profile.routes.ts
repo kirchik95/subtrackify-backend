@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
 import { profileController } from './profile.controller.js';
-import { changePasswordSchema, updateProfileSchema } from './profile.schema.js';
+import { changePasswordJsonSchema, updateProfileJsonSchema } from './profile.schema.js';
 
 export async function profileRoutes(fastify: FastifyInstance) {
   // Get profile
@@ -12,7 +12,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
     '/',
     {
       schema: {
-        body: updateProfileSchema,
+        body: updateProfileJsonSchema,
       },
     },
     profileController.updateProfile.bind(profileController)
@@ -23,7 +23,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
     '/change-password',
     {
       schema: {
-        body: changePasswordSchema,
+        body: changePasswordJsonSchema,
       },
     },
     profileController.changePassword.bind(profileController)

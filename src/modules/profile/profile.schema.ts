@@ -19,5 +19,39 @@ export const changePasswordSchema = z.object({
     ),
 });
 
+// JSON Schema for Fastify validation
+export const updateProfileJsonSchema = {
+  type: 'object',
+  properties: {
+    name: {
+      type: 'string',
+      minLength: 2,
+      maxLength: 255,
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      maxLength: 255,
+    },
+  },
+};
+
+export const changePasswordJsonSchema = {
+  type: 'object',
+  required: ['currentPassword', 'newPassword'],
+  properties: {
+    currentPassword: {
+      type: 'string',
+      minLength: 1,
+    },
+    newPassword: {
+      type: 'string',
+      minLength: 8,
+      maxLength: 100,
+      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)',
+    },
+  },
+};
+
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

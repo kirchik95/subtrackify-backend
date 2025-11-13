@@ -2,10 +2,10 @@ import type { FastifyInstance } from 'fastify';
 
 import { subscriptionsController } from './subscriptions.controller.js';
 import {
-  createSubscriptionSchema,
-  filterSubscriptionsSchema,
-  subscriptionIdSchema,
-  updateSubscriptionSchema,
+  createSubscriptionJsonSchema,
+  filterSubscriptionsJsonSchema,
+  subscriptionIdJsonSchema,
+  updateSubscriptionJsonSchema,
 } from './subscriptions.schema.js';
 
 export async function subscriptionsRoutes(fastify: FastifyInstance) {
@@ -14,7 +14,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
     '/',
     {
       schema: {
-        querystring: filterSubscriptionsSchema,
+        querystring: filterSubscriptionsJsonSchema,
       },
     },
     subscriptionsController.getAll.bind(subscriptionsController)
@@ -25,7 +25,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
     '/:id',
     {
       schema: {
-        params: subscriptionIdSchema,
+        params: subscriptionIdJsonSchema,
       },
     },
     subscriptionsController.getById.bind(subscriptionsController)
@@ -36,7 +36,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
     '/',
     {
       schema: {
-        body: createSubscriptionSchema,
+        body: createSubscriptionJsonSchema,
       },
     },
     subscriptionsController.create.bind(subscriptionsController)
@@ -47,8 +47,8 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
     '/:id',
     {
       schema: {
-        params: subscriptionIdSchema,
-        body: updateSubscriptionSchema,
+        params: subscriptionIdJsonSchema,
+        body: updateSubscriptionJsonSchema,
       },
     },
     subscriptionsController.update.bind(subscriptionsController)
@@ -59,7 +59,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
     '/:id',
     {
       schema: {
-        params: subscriptionIdSchema,
+        params: subscriptionIdJsonSchema,
       },
     },
     subscriptionsController.delete.bind(subscriptionsController)
