@@ -1,70 +1,107 @@
 import type { FastifyInstance } from 'fastify';
 
+import {
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod';
+
 import { subscriptionsController } from './subscriptions.controller.js';
 import {
-  createSubscriptionJsonSchema,
-  filterSubscriptionsJsonSchema,
-  subscriptionIdJsonSchema,
-  updateSubscriptionJsonSchema,
+  createSubscriptionSchema,
+  deleteSubscriptionResponseSchema,
+  errorResponseSchema,
+  filterSubscriptionsSchema,
+  subscriptionIdSchema,
+  subscriptionResponseSchema,
+  subscriptionsListResponseSchema,
+  updateSubscriptionSchema,
 } from './subscriptions.schema.js';
 
 export async function subscriptionsRoutes(fastify: FastifyInstance) {
+  // Set up Zod validation and serialization
+  fastify.setValidatorCompiler(validatorCompiler);
+  fastify.setSerializerCompiler(serializerCompiler);
+
   // Get all subscriptions (with optional filters)
-  fastify.get(
+  fastify.withTypeProvider<ZodTypeProvider>().get(
     '/',
     {
       onRequest: [fastify.authenticate],
       schema: {
-        querystring: filterSubscriptionsJsonSchema,
+        querystring: filterSubscriptionsSchema,
+        response: {
+          200: subscriptionsListResponseSchema,
+          500: errorResponseSchema,
+        },
       },
     },
     subscriptionsController.getAll.bind(subscriptionsController)
   );
 
   // Get subscription by ID
-  fastify.get(
+  fastify.withTypeProvider<ZodTypeProvider>().get(
     '/:id',
     {
       onRequest: [fastify.authenticate],
       schema: {
-        params: subscriptionIdJsonSchema,
+        params: subscriptionIdSchema,
+        response: {
+          200: subscriptionResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
       },
     },
     subscriptionsController.getById.bind(subscriptionsController)
   );
 
   // Create subscription
-  fastify.post(
+  fastify.withTypeProvider<ZodTypeProvider>().post(
     '/',
     {
       onRequest: [fastify.authenticate],
       schema: {
-        body: createSubscriptionJsonSchema,
+        body: createSubscriptionSchema,
+        response: {
+          201: subscriptionResponseSchema,
+          500: errorResponseSchema,
+        },
       },
     },
     subscriptionsController.create.bind(subscriptionsController)
   );
 
   // Update subscription
-  fastify.put(
+  fastify.withTypeProvider<ZodTypeProvider>().put(
     '/:id',
     {
       onRequest: [fastify.authenticate],
       schema: {
-        params: subscriptionIdJsonSchema,
-        body: updateSubscriptionJsonSchema,
+        params: subscriptionIdSchema,
+        body: updateSubscriptionSchema,
+        response: {
+          200: subscriptionResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
       },
     },
     subscriptionsController.update.bind(subscriptionsController)
   );
 
   // Delete subscription
-  fastify.delete(
+  fastify.withTypeProvider<ZodTypeProvider>().delete(
     '/:id',
     {
       onRequest: [fastify.authenticate],
       schema: {
-        params: subscriptionIdJsonSchema,
+        params: subscriptionIdSchema,
+        response: {
+          200: deleteSubscriptionResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
       },
     },
     subscriptionsController.delete.bind(subscriptionsController)

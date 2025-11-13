@@ -144,8 +144,51 @@ export const filterSubscriptionsJsonSchema = {
   },
 };
 
+// Subscription response schema
+export const subscriptionSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string().nullable(),
+  price: z.coerce.number(),
+  currency: z.string(),
+  billingCycle: z.string(),
+  nextBillingDate: z.coerce.date(),
+  status: z.string(),
+  category: z.string().nullable(),
+  userId: z.number().nullable(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
+// Response schemas
+export const subscriptionResponseSchema = z.object({
+  success: z.boolean(),
+  data: subscriptionSchema,
+  message: z.string().optional(),
+});
+
+export const subscriptionsListResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(subscriptionSchema),
+});
+
+export const deleteSubscriptionResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+export const errorResponseSchema = z.object({
+  success: z.boolean(),
+  error: z.string(),
+});
+
 // Type inference
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>;
 export type SubscriptionIdParams = z.infer<typeof subscriptionIdSchema>;
 export type FilterSubscriptionsQuery = z.infer<typeof filterSubscriptionsSchema>;
+export type Subscription = z.infer<typeof subscriptionSchema>;
+export type SubscriptionResponse = z.infer<typeof subscriptionResponseSchema>;
+export type SubscriptionsListResponse = z.infer<typeof subscriptionsListResponseSchema>;
+export type DeleteSubscriptionResponse = z.infer<typeof deleteSubscriptionResponseSchema>;
+export type ErrorResponse = z.infer<typeof errorResponseSchema>;
