@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  name         String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  
+  // Relations
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+// Subscription model
+model Subscription {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD") @db.VarChar(3)
+  billingCycle    String   @map("billing_cycle") @db.VarChar(50)
+  nextBillingDate DateTime @map("next_billing_date") @db.Date
+  status          String   @default("active") @db.VarChar(50)
+  category        String?  @db.VarChar(100)
+  userId          Int?     @map("user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("subscriptions")
+}

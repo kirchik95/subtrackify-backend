@@ -1,0 +1,71 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: subtrackify-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-subtrackify}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-subtrackify_secret}
+      POSTGRES_DB: ${DB_NAME:-subtrackify}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-subtrackify}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - subtrackify-network
+
+  # Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subtrackify-api
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${DB_USER:-subtrackify}:${DB_PASSWORD:-subtrackify_secret}@postgres:5432/${DB_NAME:-subtrackify}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - subtrackify-network
+
+  # pgAdmin (optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: subtrackify-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@subtrackify.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - '${PGADMIN_PORT:-5050}:80'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - subtrackify-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  subtrackify-network:
+    driver: bridge
