@@ -51,6 +51,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.withTypeProvider<ZodTypeProvider>().get(
     '/me',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         response: {
           200: meResponseSchema,

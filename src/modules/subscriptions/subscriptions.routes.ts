@@ -13,6 +13,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         querystring: filterSubscriptionsJsonSchema,
       },
@@ -24,6 +25,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         params: subscriptionIdJsonSchema,
       },
@@ -35,6 +37,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         body: createSubscriptionJsonSchema,
       },
@@ -46,6 +49,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         params: subscriptionIdJsonSchema,
         body: updateSubscriptionJsonSchema,
@@ -58,6 +62,7 @@ export async function subscriptionsRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/:id',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         params: subscriptionIdJsonSchema,
       },

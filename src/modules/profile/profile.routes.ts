@@ -5,12 +5,19 @@ import { changePasswordJsonSchema, updateProfileJsonSchema } from './profile.sch
 
 export async function profileRoutes(fastify: FastifyInstance) {
   // Get profile
-  fastify.get('/', profileController.getProfile.bind(profileController));
+  fastify.get(
+    '/',
+    {
+      onRequest: [fastify.authenticate],
+    },
+    profileController.getProfile.bind(profileController)
+  );
 
   // Update profile
   fastify.put(
     '/',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         body: updateProfileJsonSchema,
       },
@@ -22,6 +29,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/change-password',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         body: changePasswordJsonSchema,
       },
@@ -30,5 +38,11 @@ export async function profileRoutes(fastify: FastifyInstance) {
   );
 
   // Delete account
-  fastify.delete('/', profileController.deleteAccount.bind(profileController));
+  fastify.delete(
+    '/',
+    {
+      onRequest: [fastify.authenticate],
+    },
+    profileController.deleteAccount.bind(profileController)
+  );
 }

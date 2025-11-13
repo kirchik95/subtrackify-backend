@@ -8,6 +8,7 @@ export async function categoriesRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/',
     {
+      onRequest: [fastify.authenticate],
       schema: {
         querystring: categoriesQueryJsonSchema,
       },
