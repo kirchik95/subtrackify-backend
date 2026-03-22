@@ -21,5 +21,5 @@ EXPOSE 3000
 
 # Start development server with hot reload
 # Generate Prisma Client and run migrations at startup
-CMD sh -c "npx prisma generate && npx prisma db push --skip-generate && npm run dev"
+CMD sh -c "npx prisma generate && npx prisma db push && npm run dev"
 
