@@ -20,11 +20,14 @@ Backend API for Subtrackify - subscription tracking application built with Fasti
 
 ## 📖 Documentation
 
+- [Quick Start](docs/QUICKSTART.md) - Step-by-step getting started guide
 - [Architecture](docs/ARCHITECTURE.md) - Project structure and modular architecture
 - [API Documentation](docs/API.md) - Complete API reference with examples
 - [Prisma Guide](docs/PRISMA.md) - Database schema and Prisma usage
-- [Quick Start](docs/QUICKSTART.md) - Step-by-step getting started guide
+- [Environment Variables](docs/ENV.md) - All environment variables reference
+- [Deployment](docs/DEPLOYMENT.md) - Docker deployment guide
 - [Security Best Practices](docs/SECURITY.md) - 🔐 Production security guidelines (READ BEFORE DEPLOY!)
+- [Style Guide](docs/STYLEGUIDE.md) - Code style: formatting, naming, imports, patterns
 - [Linting & Formatting](docs/LINTING.md) - ESLint and Prettier configuration
 - [Libraries & Utilities](docs/LIBRARIES.md) - Guide to installed libraries and usage examples
 - [Import Aliases](docs/ALIASES.md) - Guide to using import path aliases
