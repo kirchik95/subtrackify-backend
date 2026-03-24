@@ -28,10 +28,13 @@ export class ProfileController {
   /**
    * Update profile
    */
-  async updateProfile(request: FastifyRequest<{ Body: UpdateProfileInput }>, reply: FastifyReply) {
+  async updateProfile(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const profile = await profileService.updateProfile(userId, request.body);
+      const profile = await profileService.updateProfile(
+        userId,
+        request.body as UpdateProfileInput
+      );
 
       return reply.status(200).send({
         success: true,
@@ -51,13 +54,13 @@ export class ProfileController {
   /**
    * Change password
    */
-  async changePassword(
-    request: FastifyRequest<{ Body: ChangePasswordInput }>,
-    reply: FastifyReply
-  ) {
+  async changePassword(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const result = await profileService.changePassword(userId, request.body);
+      const result = await profileService.changePassword(
+        userId,
+        request.body as ChangePasswordInput
+      );
 
       return reply.status(200).send({
         success: true,

@@ -7,10 +7,11 @@ export class CategoriesController {
   /**
    * Get all categories
    */
-  async getAll(request: FastifyRequest<{ Querystring: CategoriesQuery }>, reply: FastifyReply) {
+  async getAll(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const includeCount = request.query.includeCount || false;
+      const query = request.query as CategoriesQuery;
+      const includeCount = query.includeCount || false;
       const categories = await categoriesService.getAll(userId, includeCount);
 
       return reply.status(200).send({

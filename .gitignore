@@ -44,3 +44,7 @@ Thumbs.db
 *.temp
 
 /src/generated/prisma
+
+# Uploads
+uploads/*
+!uploads/avatars/.gitkeep

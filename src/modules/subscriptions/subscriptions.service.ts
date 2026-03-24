@@ -11,15 +11,8 @@ export class SubscriptionsService {
    * Get all subscriptions for a user
    */
   async getAll(userId: number, filters?: FilterSubscriptionsQuery) {
-    const where: {
-      userId: number;
-      category?: string;
-      status?: string;
-      price?: {
-        gte?: number;
-        lte?: number;
-      };
-    } = { userId };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = { userId };
 
     if (filters?.category) {
       where.category = filters.category;
@@ -31,18 +24,33 @@ export class SubscriptionsService {
 
     if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
       where.price = {};
-      if (filters.minPrice !== undefined) {
+      if (filters?.minPrice !== undefined) {
         where.price.gte = filters.minPrice;
       }
-      if (filters.maxPrice !== undefined) {
+      if (filters?.maxPrice !== undefined) {
         where.price.lte = filters.maxPrice;
       }
     }
 
-    return prisma.subscription.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    if (filters?.search) {
+      where.name = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [subscriptions, total] = await Promise.all([
+      prisma.subscription.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.subscription.count({ where }),
+    ]);
+
+    return { subscriptions, total, page, limit };
   }
 
   /**

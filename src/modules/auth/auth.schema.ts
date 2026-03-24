@@ -25,6 +25,7 @@ export const userSchema = z.object({
   id: z.number(),
   email: z.string(),
   name: z.string(),
+  avatarUrl: z.string().nullable().optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });

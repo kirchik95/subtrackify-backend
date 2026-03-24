@@ -16,11 +16,14 @@ model User {
   email        String         @unique
   passwordHash String         @map("password_hash")
   name         String?
+  avatarUrl    String?        @map("avatar_url")
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
-  
+
   // Relations
-  subscriptions Subscription[]
+  subscriptions       Subscription[]
+  preferences         UserPreferences?
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -36,6 +39,7 @@ model Subscription {
   nextBillingDate DateTime @map("next_billing_date") @db.Date
   status          String   @default("active") @db.VarChar(50)
   category        String?  @db.VarChar(100)
+  color           String?  @db.VarChar(7)
   userId          Int?     @map("user_id")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -44,4 +48,48 @@ model Subscription {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("subscriptions")
+}
+
+// Password reset tokens
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int       @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// User preferences
+model UserPreferences {
+  id     Int @id @default(autoincrement())
+  userId Int @unique @map("user_id")
+
+  // Notifications
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  pushNotifications  Boolean @default(false) @map("push_notifications")
+  paymentReminders   Boolean @default(true) @map("payment_reminders")
+  priceChangeAlerts  Boolean @default(false) @map("price_change_alerts")
+  weeklyReport       Boolean @default(false) @map("weekly_report")
+  marketingEmails    Boolean @default(false) @map("marketing_emails")
+
+  // Regional
+  currency String @default("USD") @db.VarChar(3)
+  language String @default("en") @db.VarChar(10)
+  timezone String @default("UTC") @db.VarChar(50)
+
+  // Appearance
+  theme       String  @default("system") @db.VarChar(20)
+  compactMode Boolean @default(false) @map("compact_mode")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
 }

@@ -11,6 +11,7 @@ export const createSubscriptionSchema = z.object({
   }),
   nextBillingDate: z.string().datetime('Invalid date format'),
   category: z.string().max(100).optional(),
+  color: z.string().max(7).optional(),
 });
 
 // Update subscription schema
@@ -35,6 +36,9 @@ export const filterSubscriptionsSchema = z.object({
     .regex(/^\d+(\.\d+)?$/)
     .transform(Number)
     .optional(),
+  search: z.string().optional(),
+  page: z.string().regex(/^\d+$/).transform(Number).optional(),
+  limit: z.string().regex(/^\d+$/).transform(Number).optional(),
 });
 
 // JSON Schema for Fastify validation
@@ -73,6 +77,10 @@ export const createSubscriptionJsonSchema = {
       type: 'string',
       maxLength: 100,
     },
+    color: {
+      type: 'string',
+      maxLength: 7,
+    },
   },
 };
 
@@ -108,6 +116,10 @@ export const updateSubscriptionJsonSchema = {
     category: {
       type: 'string',
       maxLength: 100,
+    },
+    color: {
+      type: 'string',
+      maxLength: 7,
     },
   },
 };
@@ -155,6 +167,7 @@ export const subscriptionSchema = z.object({
   nextBillingDate: z.coerce.date(),
   status: z.string(),
   category: z.string().nullable(),
+  color: z.string().nullable(),
   userId: z.number().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -170,6 +183,9 @@ export const subscriptionResponseSchema = z.object({
 export const subscriptionsListResponseSchema = z.object({
   success: z.boolean(),
   data: z.array(subscriptionSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
 });
 
 export const deleteSubscriptionResponseSchema = z.object({

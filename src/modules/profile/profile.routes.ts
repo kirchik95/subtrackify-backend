@@ -6,7 +6,7 @@ import { changePasswordJsonSchema, updateProfileJsonSchema } from './profile.sch
 export async function profileRoutes(fastify: FastifyInstance) {
   // Get profile
   fastify.get(
-    '/',
+    '/profile',
     {
       onRequest: [fastify.authenticate],
     },
@@ -15,7 +15,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
 
   // Update profile
   fastify.put(
-    '/',
+    '/profile',
     {
       onRequest: [fastify.authenticate],
       schema: {
@@ -39,7 +39,7 @@ export async function profileRoutes(fastify: FastifyInstance) {
 
   // Delete account
   fastify.delete(
-    '/',
+    '/account',
     {
       onRequest: [fastify.authenticate],
     },

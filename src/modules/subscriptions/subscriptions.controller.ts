@@ -1,5 +1,11 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import type {
+  CreateSubscriptionInput,
+  FilterSubscriptionsQuery,
+  SubscriptionIdParams,
+  UpdateSubscriptionInput,
+} from './subscriptions.schema.js';
 import { subscriptionsService } from './subscriptions.service.js';
 
 export class SubscriptionsController {
@@ -9,11 +15,17 @@ export class SubscriptionsController {
   async getAll(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const subscriptions = await subscriptionsService.getAll(userId, request.query);
+      const result = await subscriptionsService.getAll(
+        userId,
+        request.query as FilterSubscriptionsQuery
+      );
 
       return reply.status(200).send({
         success: true,
-        data: subscriptions,
+        data: result.subscriptions,
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
       });
     } catch (error) {
       request.log.error(error);
@@ -30,8 +42,8 @@ export class SubscriptionsController {
   async getById(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const id = parseInt(request.params.id as string);
-      const subscription = await subscriptionsService.getById(id, userId);
+      const { id } = request.params as SubscriptionIdParams;
+      const subscription = await subscriptionsService.getById(parseInt(id), userId);
 
       return reply.status(200).send({
         success: true,
@@ -55,7 +67,10 @@ export class SubscriptionsController {
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const subscription = await subscriptionsService.create(userId, request.body);
+      const subscription = await subscriptionsService.create(
+        userId,
+        request.body as CreateSubscriptionInput
+      );
 
       return reply.status(201).send({
         success: true,
@@ -77,8 +92,12 @@ export class SubscriptionsController {
   async update(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const id = parseInt(request.params.id as string);
-      const subscription = await subscriptionsService.update(id, userId, request.body);
+      const { id } = request.params as SubscriptionIdParams;
+      const subscription = await subscriptionsService.update(
+        parseInt(id),
+        userId,
+        request.body as UpdateSubscriptionInput
+      );
 
       return reply.status(200).send({
         success: true,
@@ -103,8 +122,8 @@ export class SubscriptionsController {
   async delete(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const id = parseInt(request.params.id as string);
-      const result = await subscriptionsService.delete(id, userId);
+      const { id } = request.params as SubscriptionIdParams;
+      const result = await subscriptionsService.delete(parseInt(id), userId);
 
       return reply.status(200).send({
         success: true,
