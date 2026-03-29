@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Create subscription schema
 export const createSubscriptionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).optional().nullable(),
   price: z.number().positive('Price must be positive'),
   currency: z.string().length(3, 'Currency must be 3 characters').default('USD'),
   billingCycle: z.enum(['daily', 'weekly', 'monthly', 'yearly'], {
@@ -11,7 +11,7 @@ export const createSubscriptionSchema = z.object({
   }),
   nextBillingDate: z.string().datetime('Invalid date format'),
   categoryId: z.number().int().positive().optional().nullable(),
-  color: z.string().max(7).optional(),
+  color: z.string().max(7).optional().nullable(),
 });
 
 // Update subscription schema
