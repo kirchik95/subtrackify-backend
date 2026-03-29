@@ -6,8 +6,14 @@ All notable changes to the Subtrackify Backend.
 
 ### Added
 
-- **CORS** — `@fastify/cors` with env-driven `CORS_ORIGIN`, credentials support (`12b8aad`)
-- **Rate limiting** — `@fastify/rate-limit` globally 100 req/min; stricter limits on auth endpoints: login 5/min, register 3/min, forgot-password 3/min, reset-password 5/min (`12b8aad`)
+- **CORS** — `@fastify/cors` with env-driven `CORS_ORIGIN`, credentials support
+- **Rate limiting** — `@fastify/rate-limit` globally 100 req/min; stricter limits on auth endpoints: login 5/min, register 3/min, forgot-password 3/min, reset-password 5/min
+- **Refresh tokens** — access token 15min + refresh token 30 days (DB-stored, single-use rotation). New endpoints: `POST /auth/refresh`, `POST /auth/logout`
+- **Category model** — dedicated `Category` table (id, name, icon, color, userId) with unique constraint per user. Full CRUD: `GET/POST /api/categories`, `PUT/DELETE /api/categories/:id`. Subscription `category` string replaced with `categoryId` FK. Subscriptions include category object in responses. Analytics and CSV export/import updated for category relation
+
+### Fixed
+
+- Allow `null` for `color` and `description` fields in subscription create/update schema
 
 ## [1.0.0] - 2026-03-29
 
