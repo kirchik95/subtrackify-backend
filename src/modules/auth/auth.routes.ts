@@ -19,10 +19,13 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
 
-  // Register
+  // Register (3 attempts/minute)
   fastify.withTypeProvider<ZodTypeProvider>().post(
     '/register',
     {
+      config: {
+        rateLimit: { max: 3, timeWindow: '1 minute' },
+      },
       schema: {
         body: registerSchema,
         response: {
@@ -33,10 +36,13 @@ export async function authRoutes(fastify: FastifyInstance) {
     authController.register.bind(authController)
   );
 
-  // Login
+  // Login (5 attempts/minute)
   fastify.withTypeProvider<ZodTypeProvider>().post(
     '/login',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         body: loginSchema,
         response: {
