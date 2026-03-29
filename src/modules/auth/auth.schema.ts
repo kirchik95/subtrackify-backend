@@ -25,12 +25,23 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+// Google auth schema
+export const googleAuthSchema = z.object({
+  accessToken: z.string().min(1, 'Google access token is required'),
+});
+
+// Verify email schema
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, 'Verification token is required'),
+});
+
 // Response schemas (Zod)
 export const userSchema = z.object({
   id: z.number(),
   email: z.string(),
   name: z.string(),
   avatarUrl: z.string().nullable().optional(),
+  emailVerified: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -67,6 +78,8 @@ export const messageResponseSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+export type GoogleAuthInput = z.infer<typeof googleAuthSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type User = z.infer<typeof userSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type MeResponse = z.infer<typeof meResponseSchema>;

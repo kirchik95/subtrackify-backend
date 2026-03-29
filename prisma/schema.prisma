@@ -12,20 +12,23 @@ datasource db {
 
 // User model for authentication
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  passwordHash String         @map("password_hash")
-  name         String?
-  avatarUrl    String?        @map("avatar_url")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String?        @map("password_hash")
+  name          String?
+  avatarUrl     String?        @map("avatar_url")
+  emailVerified Boolean        @default(false) @map("email_verified")
+  googleId      String?        @unique @map("google_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  subscriptions       Subscription[]
-  categories          Category[]
-  preferences         UserPreferences?
-  passwordResetTokens PasswordResetToken[]
-  refreshTokens       RefreshToken[]
+  subscriptions           Subscription[]
+  categories              Category[]
+  preferences             UserPreferences?
+  passwordResetTokens     PasswordResetToken[]
+  refreshTokens           RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
 }
@@ -95,6 +98,20 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+// Email verification tokens
+model EmailVerificationToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int       @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verification_tokens")
 }
 
 // User preferences

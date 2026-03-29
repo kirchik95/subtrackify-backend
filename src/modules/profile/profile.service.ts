@@ -17,6 +17,7 @@ export class ProfileService {
         email: true,
         name: true,
         avatarUrl: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -55,6 +56,7 @@ export class ProfileService {
         email: true,
         name: true,
         avatarUrl: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -72,6 +74,13 @@ export class ProfileService {
 
     if (!user) {
       throw new Error('User not found');
+    }
+
+    // Check if user has a password (Google OAuth users may not)
+    if (!user.passwordHash) {
+      throw new Error(
+        'Cannot change password for accounts without a password. Set a password first.'
+      );
     }
 
     // Verify current password

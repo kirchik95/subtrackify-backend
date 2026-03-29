@@ -9,12 +9,14 @@ import {
 import { authController } from './auth.controller.js';
 import {
   authResponseSchema,
+  googleAuthSchema,
   loginSchema,
   meResponseSchema,
   messageResponseSchema,
   refreshTokenSchema,
   registerSchema,
   tokenResponseSchema,
+  verifyEmailSchema,
 } from './auth.schema.js';
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -56,6 +58,40 @@ export async function authRoutes(fastify: FastifyInstance) {
     authController.login.bind(authController)
   );
 
+  // Google OAuth (5 attempts/minute)
+  fastify.withTypeProvider<ZodTypeProvider>().post(
+    '/google',
+    {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
+      schema: {
+        body: googleAuthSchema,
+        response: {
+          200: authResponseSchema,
+        },
+      },
+    },
+    authController.googleAuth.bind(authController)
+  );
+
+  // Verify email (public — token in body)
+  fastify.withTypeProvider<ZodTypeProvider>().post(
+    '/verify-email',
+    {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
+      schema: {
+        body: verifyEmailSchema,
+        response: {
+          200: messageResponseSchema,
+        },
+      },
+    },
+    authController.verifyEmail.bind(authController)
+  );
+
   // Refresh token (10 attempts/minute)
   fastify.withTypeProvider<ZodTypeProvider>().post(
     '/refresh',
@@ -85,6 +121,23 @@ export async function authRoutes(fastify: FastifyInstance) {
       },
     },
     authController.logout.bind(authController)
+  );
+
+  // Send verification email (protected, 3/min)
+  fastify.withTypeProvider<ZodTypeProvider>().post(
+    '/send-verification',
+    {
+      onRequest: [fastify.authenticate],
+      config: {
+        rateLimit: { max: 3, timeWindow: '1 minute' },
+      },
+      schema: {
+        response: {
+          200: messageResponseSchema,
+        },
+      },
+    },
+    authController.sendVerification.bind(authController)
   );
 
   // Get current user (protected)

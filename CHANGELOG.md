@@ -11,6 +11,10 @@ All notable changes to the Subtrackify Backend.
 - **Refresh tokens** — access token 15min + refresh token 30 days (DB-stored, single-use rotation). New endpoints: `POST /auth/refresh`, `POST /auth/logout`
 - **Category model** — dedicated `Category` table (id, name, icon, color, userId) with unique constraint per user. Full CRUD: `GET/POST /api/categories`, `PUT/DELETE /api/categories/:id`. Subscription `category` string replaced with `categoryId` FK. Subscriptions include category object in responses. Analytics and CSV export/import updated for category relation
 
+- **Email verification** — `EmailVerificationToken` model, `POST /auth/verify-email` (public), `POST /auth/send-verification` (protected, 3/min). Auto-sends on registration. 24-hour token expiry, single-use
+- **Google OAuth** — `POST /auth/google` endpoint accepts Google access token, fetches userinfo, creates or links user account. `googleId` field on User, `passwordHash` made nullable for OAuth-only accounts
+- **`emailVerified` field** — added to User model and all user response payloads (auth, profile, /me)
+
 ### Fixed
 
 - Allow `null` for `color` and `description` fields in subscription create/update schema

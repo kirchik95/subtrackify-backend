@@ -1,6 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { LoginInput, RefreshTokenInput, RegisterInput } from './auth.schema.js';
+import type {
+  GoogleAuthInput,
+  LoginInput,
+  RefreshTokenInput,
+  RegisterInput,
+  VerifyEmailInput,
+} from './auth.schema.js';
 import { authService } from './auth.service.js';
 
 export class AuthController {
@@ -40,6 +46,69 @@ export class AuthController {
       request.log.error(error);
       const message = error instanceof Error ? error.message : 'Login failed';
       return reply.status(401).send({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  /**
+   * Google OAuth
+   */
+  async googleAuth(request: FastifyRequest<{ Body: GoogleAuthInput }>, reply: FastifyReply) {
+    try {
+      const result = await authService.googleAuth(request.body.accessToken);
+      return reply.status(200).send({
+        success: true,
+        data: result,
+        message: 'Google authentication successful',
+      });
+    } catch (error) {
+      request.log.error(error);
+      const message = error instanceof Error ? error.message : 'Google authentication failed';
+      return reply.status(401).send({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  /**
+   * Send verification email
+   */
+  async sendVerification(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = request.user!.userId;
+      const email = request.user!.email;
+      await authService.sendVerificationEmail(userId, email);
+      return reply.status(200).send({
+        success: true,
+        message: 'Verification email sent',
+      });
+    } catch (error) {
+      request.log.error(error);
+      const message = error instanceof Error ? error.message : 'Failed to send verification email';
+      return reply.status(400).send({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(request: FastifyRequest<{ Body: VerifyEmailInput }>, reply: FastifyReply) {
+    try {
+      const result = await authService.verifyEmail(request.body.token);
+      return reply.status(200).send({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      request.log.error(error);
+      const message = error instanceof Error ? error.message : 'Email verification failed';
+      return reply.status(400).send({
         success: false,
         error: message,
       });
