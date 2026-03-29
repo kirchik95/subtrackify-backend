@@ -20,6 +20,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+// Refresh token schema
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token is required'),
+});
+
 // Response schemas (Zod)
 export const userSchema = z.object({
   id: z.number(),
@@ -34,9 +39,18 @@ export const authResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
     user: userSchema,
-    token: z.string(),
+    accessToken: z.string(),
+    refreshToken: z.string(),
   }),
   message: z.string(),
+});
+
+export const tokenResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  }),
 });
 
 export const meResponseSchema = z.object({
@@ -44,9 +58,15 @@ export const meResponseSchema = z.object({
   data: userSchema,
 });
 
+export const messageResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
 // Type inference
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type User = z.infer<typeof userSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type MeResponse = z.infer<typeof meResponseSchema>;

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { LoginInput, RegisterInput } from './auth.schema.js';
+import type { LoginInput, RefreshTokenInput, RegisterInput } from './auth.schema.js';
 import { authService } from './auth.service.js';
 
 export class AuthController {
@@ -47,14 +47,50 @@ export class AuthController {
   }
 
   /**
+   * Refresh access token
+   */
+  async refresh(request: FastifyRequest<{ Body: RefreshTokenInput }>, reply: FastifyReply) {
+    try {
+      const result = await authService.refresh(request.body.refreshToken);
+      return reply.status(200).send({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      request.log.error(error);
+      const message = error instanceof Error ? error.message : 'Token refresh failed';
+      return reply.status(401).send({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  /**
+   * Logout — invalidate refresh token
+   */
+  async logout(request: FastifyRequest<{ Body: RefreshTokenInput }>, reply: FastifyReply) {
+    try {
+      await authService.logout(request.body.refreshToken);
+      return reply.status(200).send({
+        success: true,
+        message: 'Logged out successfully',
+      });
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(200).send({
+        success: true,
+        message: 'Logged out successfully',
+      });
+    }
+  }
+
+  /**
    * Get current user profile
    */
   async me(request: FastifyRequest, reply: FastifyReply) {
     try {
-      // Get user ID from auth plugin
       const userId = request.user!.userId;
-
-      // Fetch full user data from database
       const user = await authService.getUserById(userId);
 
       return reply.status(200).send({

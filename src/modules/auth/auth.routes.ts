@@ -11,7 +11,10 @@ import {
   authResponseSchema,
   loginSchema,
   meResponseSchema,
+  messageResponseSchema,
+  refreshTokenSchema,
   registerSchema,
+  tokenResponseSchema,
 } from './auth.schema.js';
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -51,6 +54,37 @@ export async function authRoutes(fastify: FastifyInstance) {
       },
     },
     authController.login.bind(authController)
+  );
+
+  // Refresh token (10 attempts/minute)
+  fastify.withTypeProvider<ZodTypeProvider>().post(
+    '/refresh',
+    {
+      config: {
+        rateLimit: { max: 10, timeWindow: '1 minute' },
+      },
+      schema: {
+        body: refreshTokenSchema,
+        response: {
+          200: tokenResponseSchema,
+        },
+      },
+    },
+    authController.refresh.bind(authController)
+  );
+
+  // Logout
+  fastify.withTypeProvider<ZodTypeProvider>().post(
+    '/logout',
+    {
+      schema: {
+        body: refreshTokenSchema,
+        response: {
+          200: messageResponseSchema,
+        },
+      },
+    },
+    authController.logout.bind(authController)
   );
 
   // Get current user (protected)
