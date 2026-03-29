@@ -1,6 +1,8 @@
 import prisma from '@db/prisma.js';
 import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 
+import { convert } from '../../utils/exchangeRates.js';
+
 function normalizeToMonthly(price: number, billingCycle: string): number {
   switch (billingCycle) {
     case 'daily':
@@ -24,7 +26,7 @@ export class AnalyticsService {
   /**
    * Get subscription spending summary with month-over-month comparison
    */
-  async getSummary(userId: number) {
+  async getSummary(userId: number, targetCurrency: string) {
     const subscriptions = await prisma.subscription.findMany({
       where: { userId },
     });
@@ -35,20 +37,23 @@ export class AnalyticsService {
     const totalCount = subscriptions.length;
 
     // Current monthly total from active subscriptions
-    const monthlyTotal = subscriptions
-      .filter((s) => s.status === 'active')
-      .reduce((sum, s) => sum + normalizeToMonthly(s.price.toNumber(), s.billingCycle), 0);
+    let monthlyTotal = 0;
+    for (const s of subscriptions.filter((s) => s.status === 'active')) {
+      const converted = await convert(s.price.toNumber(), s.currency, targetCurrency);
+      monthlyTotal += normalizeToMonthly(converted, s.billingCycle);
+    }
 
-    // Previous month estimate: subs created before start of this month
-    // that are active or were active (cancelled but created before this month)
+    // Previous month estimate
     const thisMonthStart = startOfMonth(new Date());
-    const previousMonthTotal = subscriptions
-      .filter(
-        (s) =>
-          s.createdAt < thisMonthStart &&
-          (s.status === 'active' || s.status === 'paused' || s.status === 'cancelled')
-      )
-      .reduce((sum, s) => sum + normalizeToMonthly(s.price.toNumber(), s.billingCycle), 0);
+    let previousMonthTotal = 0;
+    for (const s of subscriptions.filter(
+      (s) =>
+        s.createdAt < thisMonthStart &&
+        (s.status === 'active' || s.status === 'paused' || s.status === 'cancelled')
+    )) {
+      const converted = await convert(s.price.toNumber(), s.currency, targetCurrency);
+      previousMonthTotal += normalizeToMonthly(converted, s.billingCycle);
+    }
 
     const changePercent =
       previousMonthTotal > 0 ? ((monthlyTotal - previousMonthTotal) / previousMonthTotal) * 100 : 0;
@@ -61,13 +66,14 @@ export class AnalyticsService {
       pausedCount,
       cancelledCount,
       totalCount,
+      currency: targetCurrency,
     };
   }
 
   /**
    * Get monthly spending history for the last N months
    */
-  async getSpendingHistory(userId: number, months: number = 12) {
+  async getSpendingHistory(userId: number, months: number = 12, targetCurrency: string = 'USD') {
     const subscriptions = await prisma.subscription.findMany({
       where: { userId },
     });
@@ -80,10 +86,13 @@ export class AnalyticsService {
       const monthEnd = endOfMonth(targetDate);
       const monthLabel = format(targetDate, 'yyyy-MM');
 
-      // Include subscriptions that existed during this month and were active or paused
-      const monthTotal = subscriptions
-        .filter((s) => s.createdAt <= monthEnd && (s.status === 'active' || s.status === 'paused'))
-        .reduce((sum, s) => sum + normalizeToMonthly(s.price.toNumber(), s.billingCycle), 0);
+      let monthTotal = 0;
+      for (const s of subscriptions.filter(
+        (s) => s.createdAt <= monthEnd && (s.status === 'active' || s.status === 'paused')
+      )) {
+        const converted = await convert(s.price.toNumber(), s.currency, targetCurrency);
+        monthTotal += normalizeToMonthly(converted, s.billingCycle);
+      }
 
       history.push({
         month: monthLabel,
@@ -91,13 +100,13 @@ export class AnalyticsService {
       });
     }
 
-    return history;
+    return { history, currency: targetCurrency };
   }
 
   /**
    * Get spending breakdown by category for active subscriptions
    */
-  async getByCategory(userId: number) {
+  async getByCategory(userId: number, targetCurrency: string = 'USD') {
     const subscriptions = await prisma.subscription.findMany({
       where: { userId, status: 'active' },
       include: { category: { select: { name: true } } },
@@ -108,7 +117,8 @@ export class AnalyticsService {
 
     for (const sub of subscriptions) {
       const category = sub.category?.name || 'Uncategorized';
-      const monthlyPrice = normalizeToMonthly(sub.price.toNumber(), sub.billingCycle);
+      const converted = await convert(sub.price.toNumber(), sub.currency, targetCurrency);
+      const monthlyPrice = normalizeToMonthly(converted, sub.billingCycle);
       const existing = categoryMap.get(category);
 
       if (existing) {
@@ -123,7 +133,7 @@ export class AnalyticsService {
     const grandTotal = Array.from(categoryMap.values()).reduce((sum, cat) => sum + cat.total, 0);
 
     // Build result sorted by total descending
-    const result = Array.from(categoryMap.entries())
+    const categories = Array.from(categoryMap.entries())
       .map(([category, { total, count }]) => ({
         category,
         total: round2(total),
@@ -132,7 +142,7 @@ export class AnalyticsService {
       }))
       .sort((a, b) => b.total - a.total);
 
-    return result;
+    return { categories, currency: targetCurrency };
   }
 }
 

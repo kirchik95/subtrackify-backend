@@ -1,6 +1,13 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import prisma from '@db/prisma.js';
+
 import { analyticsService } from './analytics.service.js';
+
+async function getUserCurrency(userId: number): Promise<string> {
+  const prefs = await prisma.userPreferences.findUnique({ where: { userId } });
+  return prefs?.currency || 'USD';
+}
 
 export class AnalyticsController {
   /**
@@ -9,7 +16,8 @@ export class AnalyticsController {
   async getSummary(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const data = await analyticsService.getSummary(userId);
+      const currency = await getUserCurrency(userId);
+      const data = await analyticsService.getSummary(userId, currency);
 
       return reply.status(200).send({
         success: true,
@@ -32,7 +40,8 @@ export class AnalyticsController {
       const userId = request.user!.userId;
       const query = request.query as { months?: number };
       const months = query.months ?? 12;
-      const data = await analyticsService.getSpendingHistory(userId, months);
+      const currency = await getUserCurrency(userId);
+      const data = await analyticsService.getSpendingHistory(userId, months, currency);
 
       return reply.status(200).send({
         success: true,
@@ -53,7 +62,8 @@ export class AnalyticsController {
   async getByCategory(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userId = request.user!.userId;
-      const data = await analyticsService.getByCategory(userId);
+      const currency = await getUserCurrency(userId);
+      const data = await analyticsService.getByCategory(userId, currency);
 
       return reply.status(200).send({
         success: true,

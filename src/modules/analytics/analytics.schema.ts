@@ -10,6 +10,7 @@ export const summaryResponseSchema = z.object({
     pausedCount: z.number(),
     cancelledCount: z.number(),
     totalCount: z.number(),
+    currency: z.string(),
   }),
 });
 
@@ -19,24 +20,30 @@ export const spendingHistoryQuerySchema = z.object({
 
 export const spendingHistoryResponseSchema = z.object({
   success: z.boolean(),
-  data: z.array(
-    z.object({
-      month: z.string(),
-      total: z.number(),
-    })
-  ),
+  data: z.object({
+    history: z.array(
+      z.object({
+        month: z.string(),
+        total: z.number(),
+      })
+    ),
+    currency: z.string(),
+  }),
 });
 
 export const byCategoryResponseSchema = z.object({
   success: z.boolean(),
-  data: z.array(
-    z.object({
-      category: z.string(),
-      total: z.number(),
-      count: z.number(),
-      percentage: z.number(),
-    })
-  ),
+  data: z.object({
+    categories: z.array(
+      z.object({
+        category: z.string(),
+        total: z.number(),
+        count: z.number(),
+        percentage: z.number(),
+      })
+    ),
+    currency: z.string(),
+  }),
 });
 
 export const errorResponseSchema = z.object({
