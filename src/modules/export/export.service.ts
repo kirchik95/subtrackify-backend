@@ -53,6 +53,7 @@ export class ExportService {
   async exportCsv(userId: number): Promise<string> {
     const subscriptions = await prisma.subscription.findMany({
       where: { userId },
+      include: { category: { select: { name: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -68,7 +69,7 @@ export class ExportService {
         escapeCsvValue(sub.billingCycle),
         escapeCsvValue(sub.nextBillingDate.toISOString().split('T')[0]),
         escapeCsvValue(sub.status),
-        escapeCsvValue(sub.category),
+        escapeCsvValue(sub.category?.name),
         escapeCsvValue(sub.color),
       ];
       return values.join(',');
@@ -93,7 +94,6 @@ export class ExportService {
       };
     }
 
-    // Parse header to identify column mapping
     const headerLine = parseCsvLine(lines[0]);
     const headerMap: Record<string, number> = {};
     headerLine.forEach((header, index) => {
@@ -108,7 +108,7 @@ export class ExportService {
       billingCycle: string;
       nextBillingDate: Date;
       status: string;
-      category: string | null;
+      categoryName: string | null;
       color: string | null;
     }[] = [];
     const errors: { row: number; message: string }[] = [];
@@ -163,7 +163,7 @@ export class ExportService {
 
       const description = getValue('description') || null;
       const currency = getValue('currency') || 'USD';
-      const category = getValue('category') || null;
+      const categoryName = getValue('category') || null;
       const color = getValue('color') || null;
 
       validRecords.push({
@@ -174,14 +174,41 @@ export class ExportService {
         billingCycle: billingCycle.toLowerCase(),
         nextBillingDate,
         status: status.toLowerCase(),
-        category,
+        categoryName,
         color,
       });
     }
 
     if (validRecords.length > 0) {
+      // Resolve category names to IDs (create if needed)
+      const uniqueCategoryNames = [
+        ...new Set(validRecords.map((r) => r.categoryName).filter(Boolean)),
+      ] as string[];
+
+      const categoryMap = new Map<string, number>();
+
+      for (const catName of uniqueCategoryNames) {
+        const category = await prisma.category.upsert({
+          where: { userId_name: { userId, name: catName } },
+          update: {},
+          create: { name: catName, userId },
+        });
+        categoryMap.set(catName, category.id);
+      }
+
       await prisma.subscription.createMany({
-        data: validRecords.map((r) => ({ ...r, userId })),
+        data: validRecords.map((r) => ({
+          name: r.name,
+          description: r.description,
+          price: r.price,
+          currency: r.currency,
+          billingCycle: r.billingCycle,
+          nextBillingDate: r.nextBillingDate,
+          status: r.status,
+          categoryId: r.categoryName ? (categoryMap.get(r.categoryName) ?? null) : null,
+          color: r.color,
+          userId,
+        })),
       });
     }
 

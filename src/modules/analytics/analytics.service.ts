@@ -100,13 +100,14 @@ export class AnalyticsService {
   async getByCategory(userId: number) {
     const subscriptions = await prisma.subscription.findMany({
       where: { userId, status: 'active' },
+      include: { category: { select: { name: true } } },
     });
 
-    // Group by category
+    // Group by category name
     const categoryMap = new Map<string, { total: number; count: number }>();
 
     for (const sub of subscriptions) {
-      const category = sub.category || 'Uncategorized';
+      const category = sub.category?.name || 'Uncategorized';
       const monthlyPrice = normalizeToMonthly(sub.price.toNumber(), sub.billingCycle);
       const existing = categoryMap.get(category);
 

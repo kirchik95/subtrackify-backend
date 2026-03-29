@@ -6,6 +6,8 @@ import type {
   UpdateSubscriptionInput,
 } from './subscriptions.schema.js';
 
+const includeCategory = { category: { select: { id: true, name: true, icon: true, color: true } } };
+
 export class SubscriptionsService {
   /**
    * Get all subscriptions for a user
@@ -14,8 +16,8 @@ export class SubscriptionsService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: Record<string, any> = { userId };
 
-    if (filters?.category) {
-      where.category = filters.category;
+    if (filters?.categoryId) {
+      where.categoryId = filters.categoryId;
     }
 
     if (filters?.status) {
@@ -43,6 +45,7 @@ export class SubscriptionsService {
     const [subscriptions, total] = await Promise.all([
       prisma.subscription.findMany({
         where,
+        include: includeCategory,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -59,6 +62,7 @@ export class SubscriptionsService {
   async getById(id: number, userId: number) {
     const subscription = await prisma.subscription.findFirst({
       where: { id, userId },
+      include: includeCategory,
     });
 
     if (!subscription) {
@@ -78,6 +82,7 @@ export class SubscriptionsService {
         nextBillingDate: new Date(data.nextBillingDate),
         userId,
       },
+      include: includeCategory,
     });
   }
 
@@ -85,7 +90,6 @@ export class SubscriptionsService {
    * Update subscription
    */
   async update(id: number, userId: number, data: UpdateSubscriptionInput) {
-    // Check if subscription exists and belongs to user
     await this.getById(id, userId);
 
     const updateData: Record<string, unknown> = { ...data };
@@ -96,6 +100,7 @@ export class SubscriptionsService {
     return prisma.subscription.update({
       where: { id },
       data: updateData,
+      include: includeCategory,
     });
   }
 
@@ -103,7 +108,6 @@ export class SubscriptionsService {
    * Delete subscription
    */
   async delete(id: number, userId: number) {
-    // Check if subscription exists and belongs to user
     await this.getById(id, userId);
 
     await prisma.subscription.delete({

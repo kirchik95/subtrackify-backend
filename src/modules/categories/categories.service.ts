@@ -1,37 +1,60 @@
 import prisma from '@db/prisma.js';
-import { uniq } from 'lodash-es';
+
+import type { CreateCategoryInput, UpdateCategoryInput } from './categories.schema.js';
 
 export class CategoriesService {
   /**
-   * Get all unique categories for a user
+   * Get all categories for a user with subscription count
    */
-  async getAll(userId: number, includeCount = false) {
-    const subscriptions = await prisma.subscription.findMany({
+  async getAll(userId: number) {
+    return prisma.category.findMany({
       where: { userId },
-      select: { category: true },
+      include: { _count: { select: { subscriptions: true } } },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  /**
+   * Create a new category
+   */
+  async create(userId: number, data: CreateCategoryInput) {
+    return prisma.category.create({
+      data: { ...data, userId },
+    });
+  }
+
+  /**
+   * Update a category
+   */
+  async update(id: number, userId: number, data: UpdateCategoryInput) {
+    const category = await prisma.category.findFirst({
+      where: { id, userId },
     });
 
-    const categories = uniq(
-      subscriptions
-        .map((s) => s.category)
-        .filter((cat): cat is string => cat !== null && cat !== undefined)
-    );
-
-    if (!includeCount) {
-      return categories.map((name) => ({ name }));
+    if (!category) {
+      throw new Error('Category not found');
     }
 
-    // Get count for each category
-    const categoriesWithCount = await Promise.all(
-      categories.map(async (name) => {
-        const count = await prisma.subscription.count({
-          where: { userId, category: name },
-        });
-        return { name, count };
-      })
-    );
+    return prisma.category.update({
+      where: { id },
+      data,
+    });
+  }
 
-    return categoriesWithCount;
+  /**
+   * Delete a category (sets categoryId to null on subscriptions)
+   */
+  async delete(id: number, userId: number) {
+    const category = await prisma.category.findFirst({
+      where: { id, userId },
+    });
+
+    if (!category) {
+      throw new Error('Category not found');
+    }
+
+    await prisma.category.delete({ where: { id } });
+    return { message: 'Category deleted successfully' };
   }
 }
 

@@ -10,7 +10,7 @@ export const createSubscriptionSchema = z.object({
     message: 'Invalid billing cycle',
   }),
   nextBillingDate: z.string().datetime('Invalid date format'),
-  category: z.string().max(100).optional(),
+  categoryId: z.number().int().positive().optional().nullable(),
   color: z.string().max(7).optional(),
 });
 
@@ -24,7 +24,7 @@ export const subscriptionIdSchema = z.object({
 
 // Query filters
 export const filterSubscriptionsSchema = z.object({
-  category: z.string().optional(),
+  categoryId: z.string().regex(/^\d+$/).transform(Number).optional(),
   status: z.enum(['active', 'cancelled', 'paused']).optional(),
   minPrice: z
     .string()
@@ -46,81 +46,28 @@ export const createSubscriptionJsonSchema = {
   type: 'object',
   required: ['name', 'price', 'currency', 'billingCycle', 'nextBillingDate'],
   properties: {
-    name: {
-      type: 'string',
-      minLength: 1,
-      maxLength: 255,
-    },
-    description: {
-      type: 'string',
-      maxLength: 1000,
-    },
-    price: {
-      type: 'number',
-      exclusiveMinimum: 0,
-    },
-    currency: {
-      type: 'string',
-      minLength: 3,
-      maxLength: 3,
-      default: 'USD',
-    },
-    billingCycle: {
-      type: 'string',
-      enum: ['daily', 'weekly', 'monthly', 'yearly'],
-    },
-    nextBillingDate: {
-      type: 'string',
-      format: 'date-time',
-    },
-    category: {
-      type: 'string',
-      maxLength: 100,
-    },
-    color: {
-      type: 'string',
-      maxLength: 7,
-    },
+    name: { type: 'string', minLength: 1, maxLength: 255 },
+    description: { type: 'string', maxLength: 1000 },
+    price: { type: 'number', exclusiveMinimum: 0 },
+    currency: { type: 'string', minLength: 3, maxLength: 3, default: 'USD' },
+    billingCycle: { type: 'string', enum: ['daily', 'weekly', 'monthly', 'yearly'] },
+    nextBillingDate: { type: 'string', format: 'date-time' },
+    categoryId: { type: ['integer', 'null'] },
+    color: { type: 'string', maxLength: 7 },
   },
 };
 
 export const updateSubscriptionJsonSchema = {
   type: 'object',
   properties: {
-    name: {
-      type: 'string',
-      minLength: 1,
-      maxLength: 255,
-    },
-    description: {
-      type: 'string',
-      maxLength: 1000,
-    },
-    price: {
-      type: 'number',
-      exclusiveMinimum: 0,
-    },
-    currency: {
-      type: 'string',
-      minLength: 3,
-      maxLength: 3,
-    },
-    billingCycle: {
-      type: 'string',
-      enum: ['daily', 'weekly', 'monthly', 'yearly'],
-    },
-    nextBillingDate: {
-      type: 'string',
-      format: 'date-time',
-    },
-    category: {
-      type: 'string',
-      maxLength: 100,
-    },
-    color: {
-      type: 'string',
-      maxLength: 7,
-    },
+    name: { type: 'string', minLength: 1, maxLength: 255 },
+    description: { type: 'string', maxLength: 1000 },
+    price: { type: 'number', exclusiveMinimum: 0 },
+    currency: { type: 'string', minLength: 3, maxLength: 3 },
+    billingCycle: { type: 'string', enum: ['daily', 'weekly', 'monthly', 'yearly'] },
+    nextBillingDate: { type: 'string', format: 'date-time' },
+    categoryId: { type: ['integer', 'null'] },
+    color: { type: 'string', maxLength: 7 },
   },
 };
 
@@ -138,23 +85,22 @@ export const subscriptionIdJsonSchema = {
 export const filterSubscriptionsJsonSchema = {
   type: 'object',
   properties: {
-    category: {
-      type: 'string',
-    },
-    status: {
-      type: 'string',
-      enum: ['active', 'cancelled', 'paused'],
-    },
-    minPrice: {
-      type: 'string',
-      pattern: '^\\d+(\\.\\d+)?$',
-    },
-    maxPrice: {
-      type: 'string',
-      pattern: '^\\d+(\\.\\d+)?$',
-    },
+    categoryId: { type: 'string', pattern: '^\\d+$' },
+    status: { type: 'string', enum: ['active', 'cancelled', 'paused'] },
+    minPrice: { type: 'string', pattern: '^\\d+(\\.\\d+)?$' },
+    maxPrice: { type: 'string', pattern: '^\\d+(\\.\\d+)?$' },
   },
 };
+
+// Category in subscription response
+export const embeddedCategorySchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    icon: z.string().nullable(),
+    color: z.string().nullable(),
+  })
+  .nullable();
 
 // Subscription response schema
 export const subscriptionSchema = z.object({
@@ -166,7 +112,8 @@ export const subscriptionSchema = z.object({
   billingCycle: z.string(),
   nextBillingDate: z.coerce.date(),
   status: z.string(),
-  category: z.string().nullable(),
+  categoryId: z.number().nullable(),
+  category: embeddedCategorySchema,
   color: z.string().nullable(),
   userId: z.number().nullable(),
   createdAt: z.coerce.date(),
